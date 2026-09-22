@@ -1,0 +1,19 @@
+const $ = (s) => document.querySelector(s);
+const authScreen = $('#auth-screen'), appScreen = $('#app-screen'), authForm = $('#auth-form');
+let isLogin = false, selectedAvatar = '🌸', me, socket;
+const avatarOptions = ['🌸','🦄','🐰','🐻','🍓','🌈','🐱','🧁','✨','🍡'];
+$('#year').textContent = new Date().getFullYear();
+function renderAvatars(){ $('#avatar-picker').innerHTML = avatarOptions.map(a => `<button type="button" class="avatar-choice ${a===selectedAvatar?'selected':''}" data-avatar="${a}">${a}</button>`).join(''); document.querySelectorAll('.avatar-choice').forEach(b=>b.onclick=()=>{selectedAvatar=b.dataset.avatar;renderAvatars()}); }
+renderAvatars();
+function setMode(login){ isLogin=login; $('#auth-title').textContent=login?'Chào mừng bạn trở lại!':'Chào mừng đến vương quốc!'; $('#auth-subtitle').textContent=login?'Đăng nhập để tiếp tục cuộc trò chuyện.':'Tạo tài khoản để gặp gỡ những người bạn dễ thương.'; $('#auth-submit').innerHTML=login?'Đăng nhập <span>→</span>':'Tạo tài khoản <span>→</span>'; $('#toggle-auth').textContent=login?'Chưa có tài khoản? Đăng ký ngay':'Đã có tài khoản? Đăng nhập'; $('#avatar-picker').style.display=login?'none':'flex'; $('#auth-error').textContent=''; }
+$('#toggle-auth').onclick=()=>setMode(!isLogin);
+function showError(text){$('#auth-error').textContent=text}
+async function api(url, options={}){const r=await fetch(url,{...options,headers:{'Content-Type':'application/json',...(options.headers||{})}});const data=await r.json();if(!r.ok)throw new Error(data.error||'Có lỗi xảy ra');return data}
+authForm.onsubmit=async e=>{e.preventDefault();showError('');const button=$('#auth-submit');button.disabled=true;try{const data=await api(isLogin?'/api/auth/login':'/api/auth/register',{method:'POST',body:JSON.stringify({username:$('#username').value,password:$('#password').value,avatar:selectedAvatar})});enter(data.user)}catch(err){showError(err.message)}finally{button.disabled=false}};
+async function enter(user){me=user;authScreen.classList.add('hidden');appScreen.classList.remove('hidden');$('#logout').classList.remove('hidden');$('#my-avatar').textContent=user.avatar;$('#my-name').textContent=user.username;try{const data=await api('/api/messages');data.messages.forEach(addMessage)}catch{}connect()}
+function addMessage(msg){const mine=msg.userId===me.id;const date=msg.createdAt?new Date(msg.createdAt):new Date();const time=date.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});const el=document.createElement('div');el.className='message '+(mine?'mine':'');el.innerHTML=`<div class="message-avatar">${escapeHtml(msg.avatar)}</div><div class="bubble-wrap"><div class="message-name">${escapeHtml(msg.username)}</div><div class="bubble">${escapeHtml(msg.content)}</div><div class="time">${time}</div></div>`;$('#messages').appendChild(el);$('#messages').scrollTop=$('#messages').scrollHeight}
+function escapeHtml(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function connect(){socket=io();socket.on('chat:message',addMessage);socket.on('presence',users=>{$('#online-count').textContent=users.length;$('#member-count').textContent=users.length});socket.on('typing',data=>{$('#typing').textContent=`${data.username} đang viết...`;clearTimeout(window.typingTimer);window.typingTimer=setTimeout(()=>$('#typing').textContent='',1500)});socket.on('connect_error',()=>showError('Kết nối chat bị gián đoạn. Hãy tải lại trang.'))}
+$('#chat-form').onsubmit=e=>{e.preventDefault();const input=$('#message-input');if(!input.value.trim()||!socket)return;socket.emit('chat:send',input.value,reply=>{if(reply?.error)alert(reply.error)});input.value=''};$('#message-input').oninput=()=>{if(socket)socket.emit('typing')};
+$('#logout').onclick=async()=>{await api('/api/auth/logout',{method:'POST'});if(socket)socket.disconnect();location.reload()};
+(async()=>{try{const data=await api('/api/auth/me');enter(data.user)}catch{}})();

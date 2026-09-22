@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Vương quốc Kawaii - nơi những người đáng yêu kết nối và trò chuyện." />
+  <title>Vương quốc Kawaii 🌸</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="sky"><span>✦</span><span>✧</span><span>✦</span><span>♡</span></div>
+  <main class="shell">
+    <header class="brand"><div class="brand-mark">🌸</div><div><p class="eyebrow">WELCOME TO</p><h1>Vương quốc <em>Kawaii</em></h1></div><button id="logout" class="logout hidden">Đăng xuất</button></header>
+    <section id="auth-screen" class="auth-card">
+      <div class="castle">🏰</div><h2 id="auth-title">Chào mừng đến vương quốc!</h2><p class="muted" id="auth-subtitle">Tạo tài khoản để gặp gỡ những người bạn dễ thương.</p>
+      <form id="auth-form"><label>Tên người dùng<input id="username" autocomplete="username" required minlength="3" maxlength="20" placeholder="công_chúa_kawaii" /></label><label>Mật khẩu<input id="password" type="password" autocomplete="current-password" required minlength="6" placeholder="••••••••" /></label><div id="avatar-picker" class="avatars"></div><button class="primary" type="submit" id="auth-submit">Tạo tài khoản <span>→</span></button></form>
+      <p id="auth-error" class="error"></p><button id="toggle-auth" class="link-button">Đã có tài khoản? Đăng nhập</button>
+    </section>
+    <section id="app-screen" class="app-card hidden">
+      <aside class="sidebar"><div class="profile"><div id="my-avatar" class="avatar big">🌸</div><div><strong id="my-name">Bạn</strong><small>● Đang online</small></div></div><div class="room active"><span>💬</span><div><strong>Lâu đài trò chuyện</strong><small>Phòng chung</small></div><b id="member-count">0</b></div><div class="side-note">✨ Hãy tử tế và lan tỏa sự dễ thương nhé!</div></aside>
+      <div class="chat"><div class="chat-head"><div><h2>Lâu đài trò chuyện <span>💖</span></h2><p><i></i><span id="online-count">0</span> người bạn đang online</p></div><div class="sparkles">✦ ✧ ✦</div></div><div id="messages" class="messages"></div><div id="typing" class="typing"></div><form id="chat-form" class="composer"><input id="message-input" maxlength="500" autocomplete="off" placeholder="Gửi một lời chào thật kawaii..." /><button aria-label="Gửi tin nhắn">➤</button></form></div>
+    </section>
+    <footer>Made with 💗 for the Kawaii Kingdom · <span id="year"></span></footer>
+  </main>
+  <script src="/socket.io/socket.io.js"></script><script src="/app.js"></script>
+</body>
+</html>
